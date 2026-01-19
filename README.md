@@ -61,14 +61,7 @@ cd ChatBot
 
 ### 2. Configure API Keys
 
-**Important**: Never commit your API keys to version control!
-
-1. Copy the example file:
-   ```bash
-   cp local.properties.example local.properties
-   ```
-
-2. Open `local.properties` and add your API keys:
+1. Open `local.properties` and add your API keys:
    ```properties
    MISTRAL_API_KEY=your_mistral_key_here
    NVIDIA_API_KEY=your_nvidia_key_here
