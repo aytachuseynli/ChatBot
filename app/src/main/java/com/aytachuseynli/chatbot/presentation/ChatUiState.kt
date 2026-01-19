@@ -1,6 +1,6 @@
 package com.aytachuseynli.chatbot.presentation
 
-import com.aytachuseynli.chatbot.domain.model.AiProvider
+import com.aytachuseynli.chatbot.domain.model.AiModelConfig
 import com.aytachuseynli.chatbot.domain.model.AiResponse
 import com.aytachuseynli.chatbot.domain.model.ChatMessage
 
@@ -11,10 +11,6 @@ data class ChatUiState(
     val inputMessage: String = "",
     val isLoading: Boolean = false,
     val chatHistory: List<ChatMessage> = emptyList(),
-    val currentResponses: List<AiResponse> = listOf(
-        AiResponse(modelName = "mistral-small", modelProvider = AiProvider.MISTRAL),
-        AiResponse(modelName = "llama-3.1-8b", modelProvider = AiProvider.NVIDIA),
-        AiResponse(modelName = "command-r7b", modelProvider = AiProvider.COHERE)
-    ),
+    val currentResponses: List<AiResponse> = AiModelConfig.getDefaultResponses(),
     val isDarkTheme: Boolean = false
 )

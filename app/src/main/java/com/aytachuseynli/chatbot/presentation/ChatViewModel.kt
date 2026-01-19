@@ -2,8 +2,7 @@ package com.aytachuseynli.chatbot.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aytachuseynli.chatbot.domain.model.AiProvider
-import com.aytachuseynli.chatbot.domain.model.AiResponse
+import com.aytachuseynli.chatbot.domain.model.AiModelConfig
 import com.aytachuseynli.chatbot.domain.model.ChatMessage
 import com.aytachuseynli.chatbot.domain.repository.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,33 +25,20 @@ class ChatViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
-    /**
-     * Updates the input message as the user types
-     */
     fun onInputChange(message: String) {
         _uiState.update { it.copy(inputMessage = message) }
     }
 
-    /**
-     * Toggles the app theme between dark and light mode
-     */
     fun toggleTheme() {
         _uiState.update { it.copy(isDarkTheme = !it.isDarkTheme) }
     }
 
-    /**
-     * Sends the current input message to all AI providers
-     */
     fun sendMessage() {
         val message = _uiState.value.inputMessage.trim()
         if (message.isBlank()) return
 
         viewModelScope.launch {
-            // Add user message to history
-            val userMessage = ChatMessage(
-                content = message,
-                isFromUser = true
-            )
+            val userMessage = ChatMessage(content = message, isFromUser = true)
 
             _uiState.update {
                 it.copy(
@@ -62,30 +48,14 @@ class ChatViewModel @Inject constructor(
                 )
             }
 
-            // Collect responses as they arrive
             chatRepository.sendMessageToAllProviders(message)
                 .catch { e ->
-                    // Handle flow collection errors
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            currentResponses = listOf(
-                                AiResponse(
-                                    modelName = "mistral-small",
-                                    modelProvider = AiProvider.MISTRAL,
-                                    errorMessage = e.message
-                                ),
-                                AiResponse(
-                                    modelName = "llama-3.1-8b",
-                                    modelProvider = AiProvider.NVIDIA,
-                                    errorMessage = e.message
-                                ),
-                                AiResponse(
-                                    modelName = "command-r7b",
-                                    modelProvider = AiProvider.COHERE,
-                                    errorMessage = e.message
-                                )
-                            )
+                            currentResponses = AiModelConfig.models.map { model ->
+                                model.toErrorResponse(e.message ?: "Unknown error")
+                            }
                         )
                     }
                 }
@@ -93,7 +63,6 @@ class ChatViewModel @Inject constructor(
                     val allDone = responses.none { it.isLoading }
 
                     _uiState.update { state ->
-                        // If all responses are done, add them to chat history
                         if (allDone) {
                             val aiMessage = ChatMessage(
                                 content = message,
@@ -113,18 +82,11 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Clears the chat history
-     */
     fun clearHistory() {
         _uiState.update {
             it.copy(
                 chatHistory = emptyList(),
-                currentResponses = listOf(
-                    AiResponse(modelName = "mistral-small", modelProvider = AiProvider.MISTRAL),
-                    AiResponse(modelName = "llama-3.1-8b", modelProvider = AiProvider.NVIDIA),
-                    AiResponse(modelName = "command-r7b", modelProvider = AiProvider.COHERE)
-                )
+                currentResponses = AiModelConfig.getDefaultResponses()
             )
         }
     }

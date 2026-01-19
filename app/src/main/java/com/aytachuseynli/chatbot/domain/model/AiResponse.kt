@@ -32,12 +32,3 @@ data class ChatMessage(
     val timestamp: Long = System.currentTimeMillis(),
     val aiResponses: List<AiResponse> = emptyList()
 )
-
-/**
- * Sealed class representing the result of an AI API call
- */
-sealed class AiResult {
-    data class Success(val response: AiResponse) : AiResult()
-    data class Error(val response: AiResponse) : AiResult()
-    data class Loading(val response: AiResponse) : AiResult()
-}
