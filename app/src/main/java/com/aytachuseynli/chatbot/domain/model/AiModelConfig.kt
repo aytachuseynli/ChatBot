@@ -7,7 +7,7 @@ package com.aytachuseynli.chatbot.domain.model
 object AiModelConfig {
 
     val models = listOf(
-        ModelInfo("mistral-small", AiProvider.MISTRAL),
+        ModelInfo("mistral-large-latest", AiProvider.MISTRAL),
         ModelInfo("llama-3.1-8b", AiProvider.NVIDIA),
         ModelInfo("command-r7b", AiProvider.COHERE)
     )
